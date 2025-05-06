@@ -11,9 +11,9 @@
 #pragma config CP = OFF
 
 float voltageOutput = 0;
-int wholeNum, decimalNum, tempNum;
+unsigned int wholeNum, decimalNum, tempNum;
 int d_value = 0;
-char buffer[16];
+char data[20];
 
 void delay(int time)
 {
@@ -26,11 +26,7 @@ void delay(int time)
 
 void portConfig(void) {
     TRISD = 0x00; // data for LCD
-    //PORTD = 0x00; // initial to low
 	TRISB = 0x00; // instructions for LCD
-	//PORTB = 0x80;
-	//RB4 = 0;
-	//RB5 = 1;
 }
 
 
@@ -65,7 +61,6 @@ void dataCtrl(unsigned char data)
 	RB7 = 0; // set E to 0 (strobe)
 }
 
-
 void adcConfig(void) {
     // configure for ADC
     ADCON1 = 0x80; // result register: right Justified, clock: FOSC/8
@@ -79,21 +74,17 @@ void adcConfig(void) {
     GO = 1;        // start A/D conversion (ADCON0 reg)
     GIE = 1;       // enable all unmasked interrupts (INTCON reg)
 }
-unsigned char configDisplayValue(unsigned char whole, unsigned char decimal)
-{
-    // (upper nibble = whole, lower nibble = decimal)
-    return ((whole<<4) | (decimal & 0x0F)); 
-}
+
 void interrupt ISR(void)
 {
+	char voltage[] = "VOLTAGE:";
+
     GIE = 0; // disable all unmasked interrupts (INTCON reg)
 
     if (ADIF == 1) // checks CCP1 interrupt flag
     {
         ADIF = 0; // clears interrupt flag (INTCON reg)
 		
-	
-    
         d_value = ((ADRESH << 8) + ADRESL); // read ADRESH, move to correct position, read ADRESL
 
         // convert adc to voltage value
@@ -103,31 +94,15 @@ void interrupt ISR(void)
 		wholeNum = (int)voltageOutput;
 		decimalNum = (int)((voltageOutput - wholeNum) * 10);
 		
-		delay(50);
-
 		instCtrl(0x02);
-       voltageOutput = configDisplayValue(decimalNum, wholeNum);
-		sprintf(buffer, "VOLTAGE:%4.1f ", voltageOutput);
-        
-		for(char *p = buffer; *p; p++) {
-			 dataCtrl(*p);
-		}
-		//PORTD = wholeNum;
-		//dataCtrl(wholeNum);
-		//PORTD =1;
-	//	dataCtrl('.');
+		for (char *w = voltage; *w; w++) dataCtrl(*w);
 
-		//delay(200);
-		//PORTD = decimalNum;
-		//dataCtrl('2');
-
-	//	instCtrl(0xC0);
-
-	//	delay(10);
-       // voltageOutput = configDisplayValue(tempNum);
+		instCtrl(0xC0);
+		sprintf(data, "%d.%d ", wholeNum, decimalNum);
+		for (char *p = data; *p; p++) dataCtrl(*p);
     }
 
-    delay(200); // delay to get the hold capacitor charged
+    delay(100); // delay to get the hold capacitor charged
     GO = 1; // restart A/D conversion (ADCON0 reg)
     GIE = 1; // enable all unmasked interrupts (INTCON reg)
 }
@@ -136,27 +111,9 @@ void interrupt ISR(void)
 void main(void)
 {
     portConfig();
-
-	delay(50);
 	initLCD();
-
-/*
-	dataCtrl('V');
-	dataCtrl('O');
-	dataCtrl('L');
-	dataCtrl('T');
-	dataCtrl('A');
-	dataCtrl('G');
-	dataCtrl('E');
-*/
-	//instCtrl(0xC0); // set cursor next line below voltage
-
-	delay(100);
-
    	adcConfig();
 
-
-	delay(100);
     while(1)
     {
     }

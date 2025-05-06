@@ -1,0 +1,42 @@
+# MCU Build Artifacts
+*.obj
+*.cof
+*.d
+*.hex
+*.hxl
+*.p1
+*.pre
+*.sdb
+*.sym
+*.lst
+*.cmf
+*.as
+*.rlf
+
+# Explicitly do NOT ignore main.c and Proteus project file
+!main.c
+!proteus/main.pdsprj
+
+# Ignore other main.* build files (except main.c)
+main.*
+!main.c
+
+# Proteus Backups and temp workspace files
+proteus/Project Backups/
+proteus/*.workspace
+proteus/*.LAPTOP-*.workspace
+
+# CPU temp file
+cpu=16f877a
+
+# Function list / temp files
+funclist
+l.obj
+
+# OS / Editor temp files
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db

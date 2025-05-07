@@ -19,7 +19,7 @@ void delay(int time)
 	}
 }
 
-void usart_rx_init (void){
+void asyncReceiverConfig (void){
 	// receiver config
 	SPBRG = 0x19; // 9.6K baud rate @ FOSC=4MHz, asynchronous high speed
 				// (see formula in Table 10-1 data sheet)
@@ -43,7 +43,7 @@ void main (void) {
     unsigned int wholeNum, decimalNum;
     int data = 0;
 
-    usart_rx_init();
+    asyncReceiverConfig();
     portsConfig();
 
     while(1) {

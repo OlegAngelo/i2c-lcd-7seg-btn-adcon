@@ -1,3 +1,4 @@
+// UART - async receiver
 #include <xc.h>
 
 #pragma config FOSC = XT
